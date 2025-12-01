@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>베란다 연기 감지 Push 알림</title>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (v8 호환용 compat 버전) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 
-    <!-- Firebase 설정 파일 -->
+    <!-- 내 Firebase 설정 -->
     <script src="firebase-config.js"></script>
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 25px;
+            padding: 24px;
         }
+        h2 { margin-bottom: 8px; }
         #tokenBox {
             margin-top: 18px;
             padding: 15px;
@@ -26,6 +27,13 @@
         button {
             padding: 12px 18px;
             font-size: 16px;
+            cursor: pointer;
+        }
+        .log {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #555;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -40,40 +48,84 @@
         FCM Token이 여기에 표시됩니다...
     </div>
 
-    <script>
-        // Service Worker 등록
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("firebase-messaging-sw.js")
-                .then(() => console.log("Service Worker 등록 성공"))
-                .catch(err => console.error("Service Worker 등록 실패:", err));
-        }
+    <div id="log" class="log"></div>
 
-        // 토큰 발급
+    <script>
         const btn = document.getElementById("btn");
         const tokenBox = document.getElementById("tokenBox");
+        const logBox = document.getElementById("log");
 
+        function log(msg) {
+            console.log(msg);
+            logBox.textContent += msg + "\n";
+        }
+
+        // ① Service Worker 등록
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker
+                .register("firebase-messaging-sw.js")
+                .then(reg => {
+                    log("✅ Service Worker 등록 성공");
+                })
+                .catch(err => {
+                    log("❌ Service Worker 등록 실패: " + err);
+                });
+        } else {
+            log("❌ 이 브라우저는 Service Worker를 지원하지 않음");
+        }
+
+        // ② 버튼 클릭 시 토큰 요청
         btn.onclick = async () => {
             try {
+                log("🔔 알림 권한 요청 중...");
                 const permission = await Notification.requestPermission();
 
                 if (permission !== "granted") {
                     tokenBox.innerHTML = "❌ 알림 권한이 거부되었습니다.";
+                    log("알림 권한 거부");
                     return;
                 }
 
+                log("✅ 알림 권한 허용됨. 토큰 요청 중...");
+
                 const messaging = firebase.messaging();
+
                 const token = await messaging.getToken({
                     vapidKey: "BPix90t-jsnmYyRH1RAKW8yt2gKMCdpJHjem14nnddYg6oRQlVeg-XUN3-cwPFqjPf-NTpOhKej4oxx1Kmf5KLs"
                 });
 
+                if (!token) {
+                    tokenBox.innerHTML = "토큰을 가져오지 못했습니다 (null)";
+                    log("❌ getToken() 이 null 반환");
+                    return;
+                }
+
                 tokenBox.innerHTML = `<b>📱 FCM Token:</b><br>${token}`;
-                console.log("FCM Token:", token);
+                log("✅ FCM Token 발급 성공");
+                log(token);
 
             } catch (err) {
                 console.error(err);
                 tokenBox.innerHTML = "토큰 생성 중 오류 발생";
+                log("❌ 토큰 생성 오류: " + err);
             }
         };
+
+        // ③ 포그라운드 메시지(브라우저 열려 있을 때)
+        if (firebase.messaging) {
+            const messaging = firebase.messaging();
+            messaging.onMessage(payload => {
+                log("📩 포그라운드 메시지 수신:");
+                log(JSON.stringify(payload));
+
+                if (payload.notification) {
+                    new Notification(payload.notification.title || "알림", {
+                        body: payload.notification.body || "",
+                        icon: payload.notification.icon || "icon.png"
+                    });
+                }
+            });
+        }
     </script>
 
 </body>
