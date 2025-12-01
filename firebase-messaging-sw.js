@@ -1,3 +1,6 @@
+// firebase-messaging-sw.js
+// GitHub Pages 루트(/smoke-alarm-push/firebase-messaging-sw.js)에 있어야 함
+
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
 
@@ -15,12 +18,15 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
-// 백그라운드 알림 처리
-messaging.onBackgroundMessage((payload) => {
-  console.log("백그라운드 메시지:", payload);
+// 백그라운드에서 푸시 알림 올 때
+messaging.onBackgroundMessage(payload => {
+  console.log("[firebase-messaging-sw.js] 백그라운드 메시지:", payload);
 
-  self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
-    icon: "icon.png" // ← 이걸로 수정해야 정상
-  });
+  const title = (payload.notification && payload.notification.title) || "알림";
+  const options = {
+    body: (payload.notification && payload.notification.body) || "",
+    icon: (payload.notification && payload.notification.icon) || "icon.png"
+  };
+
+  self.registration.showNotification(title, options);
 });
