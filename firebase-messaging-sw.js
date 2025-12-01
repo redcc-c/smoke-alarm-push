@@ -15,10 +15,12 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
+// 백그라운드 알림 처리
 messaging.onBackgroundMessage((payload) => {
   console.log("백그라운드 메시지:", payload);
+
   self.registration.showNotification(payload.notification.title, {
     body: payload.notification.body,
-    icon: "/icon.png"
+    icon: "icon.png" // ← 이걸로 수정해야 정상
   });
 });
