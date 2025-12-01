@@ -7,17 +7,19 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <!-- Firebase 설정 -->
     <script src="firebase-config.js"></script>
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial;
             padding: 25px;
         }
         #tokenBox {
             margin-top: 18px;
             padding: 15px;
-            background: #f2f2f2;
+            background: #eee;
             border-radius: 10px;
             word-wrap: break-word;
         }
@@ -39,21 +41,31 @@
     </div>
 
     <script>
+        // ------------------------------
+        // ① Service Worker 등록 (필수!)
+        // ------------------------------
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("firebase-messaging-sw.js")
+                .then(() => console.log("Service Worker 등록 성공"))
+                .catch(err => console.error("Service Worker 등록 실패:", err));
+        }
+
+        // ------------------------------
+        // ② 토큰 생성 (Push 등록)
+        // ------------------------------
         const btn = document.getElementById("btn");
         const tokenBox = document.getElementById("tokenBox");
 
         btn.onclick = async () => {
             try {
-                // 브라우저 알림 허용 요청
                 const permission = await Notification.requestPermission();
+
                 if (permission !== "granted") {
-                    tokenBox.innerHTML = "알림 거부됨.";
+                    tokenBox.innerHTML = "❌ 알림 권한이 거부되었습니다.";
                     return;
                 }
 
                 const messaging = firebase.messaging();
-
-                // WebPush용 Public VAPID Key 설정
                 const token = await messaging.getToken({
                     vapidKey: "BPix90t-jsnmYyRH1RAKW8yt2gKMCdpJHjem14nnddYg6oRQlVeg-XUN3-cwPFqjPf-NTpOhKej4oxx1Kmf5KLs"
                 });
@@ -62,7 +74,343 @@
                 console.log("FCM Token:", token);
 
             } catch (err) {
-                console.error(err);
+                console.error("토큰 오류:", err);
+                tokenBox.innerHTML = "토큰 생성 중 오류 발생";
+            }
+        };
+    </script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>베란다 연기 감지 Push 알림</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <!-- Firebase 설정 -->
+    <script src="firebase-config.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 25px;
+        }
+        #tokenBox {
+            margin-top: 18px;
+            padding: 15px;
+            background: #eee;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+        button {
+            padding: 12px 18px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>📡 베란다 연기 감지 Push 알림 시스템</h2>
+    <p>아래 버튼을 눌러 스마트폰 Push 알림을 허용하세요.</p>
+
+    <button id="btn">🔔 알림 허용하기</button>
+
+    <div id="tokenBox">
+        FCM Token이 여기에 표시됩니다...
+    </div>
+
+    <script>
+        // ------------------------------
+        // ① Service Worker 등록 (필수!)
+        // ------------------------------
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("firebase-messaging-sw.js")
+                .then(() => console.log("Service Worker 등록 성공"))
+                .catch(err => console.error("Service Worker 등록 실패:", err));
+        }
+
+        // ------------------------------
+        // ② 토큰 생성 (Push 등록)
+        // ------------------------------
+        const btn = document.getElementById("btn");
+        const tokenBox = document.getElementById("tokenBox");
+
+        btn.onclick = async () => {
+            try {
+                const permission = await Notification.requestPermission();
+
+                if (permission !== "granted") {
+                    tokenBox.innerHTML = "❌ 알림 권한이 거부되었습니다.";
+                    return;
+                }
+
+                const messaging = firebase.messaging();
+                const token = await messaging.getToken({
+                    vapidKey: "BPix90t-jsnmYyRH1RAKW8yt2gKMCdpJHjem14nnddYg6oRQlVeg-XUN3-cwPFqjPf-NTpOhKej4oxx1Kmf5KLs"
+                });
+
+                tokenBox.innerHTML = `<b>📱 FCM Token:</b><br>${token}`;
+                console.log("FCM Token:", token);
+
+            } catch (err) {
+                console.error("토큰 오류:", err);
+                tokenBox.innerHTML = "토큰 생성 중 오류 발생";
+            }
+        };
+    </script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>베란다 연기 감지 Push 알림</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <!-- Firebase 설정 -->
+    <script src="firebase-config.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 25px;
+        }
+        #tokenBox {
+            margin-top: 18px;
+            padding: 15px;
+            background: #eee;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+        button {
+            padding: 12px 18px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>📡 베란다 연기 감지 Push 알림 시스템</h2>
+    <p>아래 버튼을 눌러 스마트폰 Push 알림을 허용하세요.</p>
+
+    <button id="btn">🔔 알림 허용하기</button>
+
+    <div id="tokenBox">
+        FCM Token이 여기에 표시됩니다...
+    </div>
+
+    <script>
+        // ------------------------------
+        // ① Service Worker 등록 (필수!)
+        // ------------------------------
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("firebase-messaging-sw.js")
+                .then(() => console.log("Service Worker 등록 성공"))
+                .catch(err => console.error("Service Worker 등록 실패:", err));
+        }
+
+        // ------------------------------
+        // ② 토큰 생성 (Push 등록)
+        // ------------------------------
+        const btn = document.getElementById("btn");
+        const tokenBox = document.getElementById("tokenBox");
+
+        btn.onclick = async () => {
+            try {
+                const permission = await Notification.requestPermission();
+
+                if (permission !== "granted") {
+                    tokenBox.innerHTML = "❌ 알림 권한이 거부되었습니다.";
+                    return;
+                }
+
+                const messaging = firebase.messaging();
+                const token = await messaging.getToken({
+                    vapidKey: "BPix90t-jsnmYyRH1RAKW8yt2gKMCdpJHjem14nnddYg6oRQlVeg-XUN3-cwPFqjPf-NTpOhKej4oxx1Kmf5KLs"
+                });
+
+                tokenBox.innerHTML = `<b>📱 FCM Token:</b><br>${token}`;
+                console.log("FCM Token:", token);
+
+            } catch (err) {
+                console.error("토큰 오류:", err);
+                tokenBox.innerHTML = "토큰 생성 중 오류 발생";
+            }
+        };
+    </script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>베란다 연기 감지 Push 알림</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <!-- Firebase 설정 -->
+    <script src="firebase-config.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 25px;
+        }
+        #tokenBox {
+            margin-top: 18px;
+            padding: 15px;
+            background: #eee;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+        button {
+            padding: 12px 18px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>📡 베란다 연기 감지 Push 알림 시스템</h2>
+    <p>아래 버튼을 눌러 스마트폰 Push 알림을 허용하세요.</p>
+
+    <button id="btn">🔔 알림 허용하기</button>
+
+    <div id="tokenBox">
+        FCM Token이 여기에 표시됩니다...
+    </div>
+
+    <script>
+        // ------------------------------
+        // ① Service Worker 등록 (필수!)
+        // ------------------------------
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("firebase-messaging-sw.js")
+                .then(() => console.log("Service Worker 등록 성공"))
+                .catch(err => console.error("Service Worker 등록 실패:", err));
+        }
+
+        // ------------------------------
+        // ② 토큰 생성 (Push 등록)
+        // ------------------------------
+        const btn = document.getElementById("btn");
+        const tokenBox = document.getElementById("tokenBox");
+
+        btn.onclick = async () => {
+            try {
+                const permission = await Notification.requestPermission();
+
+                if (permission !== "granted") {
+                    tokenBox.innerHTML = "❌ 알림 권한이 거부되었습니다.";
+                    return;
+                }
+
+                const messaging = firebase.messaging();
+                const token = await messaging.getToken({
+                    vapidKey: "BPix90t-jsnmYyRH1RAKW8yt2gKMCdpJHjem14nnddYg6oRQlVeg-XUN3-cwPFqjPf-NTpOhKej4oxx1Kmf5KLs"
+                });
+
+                tokenBox.innerHTML = `<b>📱 FCM Token:</b><br>${token}`;
+                console.log("FCM Token:", token);
+
+            } catch (err) {
+                console.error("토큰 오류:", err);
+                tokenBox.innerHTML = "토큰 생성 중 오류 발생";
+            }
+        };
+    </script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>베란다 연기 감지 Push 알림</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <!-- Firebase 설정 -->
+    <script src="firebase-config.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 25px;
+        }
+        #tokenBox {
+            margin-top: 18px;
+            padding: 15px;
+            background: #eee;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+        button {
+            padding: 12px 18px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>📡 베란다 연기 감지 Push 알림 시스템</h2>
+    <p>아래 버튼을 눌러 스마트폰 Push 알림을 허용하세요.</p>
+
+    <button id="btn">🔔 알림 허용하기</button>
+
+    <div id="tokenBox">
+        FCM Token이 여기에 표시됩니다...
+    </div>
+
+    <script>
+        // ------------------------------
+        // ① Service Worker 등록 (필수!)
+        // ------------------------------
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("firebase-messaging-sw.js")
+                .then(() => console.log("Service Worker 등록 성공"))
+                .catch(err => console.error("Service Worker 등록 실패:", err));
+        }
+
+        // ------------------------------
+        // ② 토큰 생성 (Push 등록)
+        // ------------------------------
+        const btn = document.getElementById("btn");
+        const tokenBox = document.getElementById("tokenBox");
+
+        btn.onclick = async () => {
+            try {
+                const permission = await Notification.requestPermission();
+
+                if (permission !== "granted") {
+                    tokenBox.innerHTML = "❌ 알림 권한이 거부되었습니다.";
+                    return;
+                }
+
+                const messaging = firebase.messaging();
+                const token = await messaging.getToken({
+                    vapidKey: "BPix90t-jsnmYyRH1RAKW8yt2gKMCdpJHjem14nnddYg6oRQlVeg-XUN3-cwPFqjPf-NTpOhKej4oxx1Kmf5KLs"
+                });
+
+                tokenBox.innerHTML = `<b>📱 FCM Token:</b><br>${token}`;
+                console.log("FCM Token:", token);
+
+            } catch (err) {
+                console.error("토큰 오류:", err);
                 tokenBox.innerHTML = "토큰 생성 중 오류 발생";
             }
         };
