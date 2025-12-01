@@ -1,3 +1,6 @@
+// firebase-config.js
+// Firebase 기본 설정 + 초기화
+
 const firebaseConfig = {
   apiKey: "AIzaSyBvzXKENAbGwf0e_V-A0LiRAbknrXuTIdU",
   authDomain: "miniproject-380f6.firebaseapp.com",
@@ -8,4 +11,7 @@ const firebaseConfig = {
   measurementId: "G-VYLCRSTKJW"
 };
 
-firebase.initializeApp(firebaseConfig);
+// 전역 Firebase 초기화
+if (!firebase.apps || !firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
